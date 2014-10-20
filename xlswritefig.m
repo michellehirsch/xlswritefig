@@ -86,7 +86,7 @@ if exist(filename,'file')==0
 else
     % The following case if file does exist (Opening File)
     %     disp(['Opening Excel File ...(' filename ')']);
-    op = invoke(Excel.Workbooks, 'open', [pwd filesep filename]);
+    op = invoke(Excel.Workbooks, 'open', filename);
     new=0;
 end
 
