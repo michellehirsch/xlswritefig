@@ -8,7 +8,7 @@ function xlswritefig(hFig,filename,sheetname,xlcell)
 %    hFig:      Handle to MATLAB figure.  If empty, current figure is
 %                   exported
 %    filename   (string) Name of Excel file, including extension.  If not specified, contents will
-%                  be opened in a new Excel spreadsheet.
+%                  be opened in a new Excel spreadsheet. 
 %    sheetname:  Name of sheet to write data to. The default is 'Sheet1'
 %                       If specified, a sheet with the specified name must
 %                       exist
@@ -45,6 +45,9 @@ if nargin<2 || isempty(filename)
     dontsave = true;
 else
     dontsave = false;
+    
+    % Create full file name with path
+    filename = fullfilename(filename);
 end
 
 if nargin < 3 || isempty(sheetname)
@@ -110,7 +113,7 @@ Paste(Activesheet,get(Activesheet,'Range',xlcell,xlcell))
 
 % Save and clean up
 if new && ~dontsave
-    invoke(op, 'SaveAs', [pwd filesep filename]);
+    invoke(op, 'SaveAs', filename);
 elseif ~new
     invoke(op, 'Save');
 else  % New, but don't save
@@ -119,3 +122,16 @@ else  % New, but don't save
 end
 invoke(Excel, 'Quit');
 delete(Excel)
+end
+
+
+function filename = fullfilename(filename)
+[filepath, filename, fileext] = fileparts(filename);
+if isempty(filepath)
+    filepath = pwd;
+end
+if isempty(fileext)
+    fileext = '.xlsx';
+end
+filename = fullfile(filepath, [filename fileext]);
+end
