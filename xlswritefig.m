@@ -21,6 +21,7 @@ function xlswritefig(hFig,filename,sheetname,xlcell)
 % Ex:
 % Paste the current figure into a new Excel spreadsheet which is left open.
 %         plot(rand(10,1))
+%         drawnow    % Maybe overkill, but ensures plot is drawn first
 %         xlswritefig
 %
 % Specify all options.  
@@ -66,6 +67,7 @@ end;
 % seems to work pretty well.
 r = get(hFig,'Renderer');
 set(hFig,'Renderer','Painters')
+drawnow
 hgexport(hFig,'-clipboard')
 set(hFig,'Renderer',r)
 
