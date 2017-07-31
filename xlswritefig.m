@@ -99,11 +99,10 @@ try
     Sheets = Excel.ActiveWorkBook.Sheets;
     target_sheet = get(Sheets, 'Item', sheetname);
 catch %#ok<CTCH>   Suppress so that this function works in releases without MException
-    % Error if the sheet doesn't exist.  It would be nice to create it, but
-    % I'm too lazy.
-    % The alternative to try/catch is to call xlsfinfo to see if the sheet exists, but
-    % that's really slow.
-    error(['Sheet ' sheetname ' does not exist!']);
+    % Add the sheet if it doesn't exist
+    target_sheet = Excel.ActiveWorkBook.Worksheets.Add();
+    target_sheet.Name = sheetname;
+
 end;
 
 invoke(target_sheet, 'Activate');
