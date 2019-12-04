@@ -37,3 +37,5 @@ surf(peaks)
 xlswritefig(hFig,'MyNewFile.xlsx','Sheet2','D4')
 winopen('MyNewFile.xlsx') 
 ```
+
+[![View xlswritefig on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/24424-xlswritefig)
