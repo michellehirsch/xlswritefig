@@ -57,19 +57,22 @@ end;
 
 if nargin<4
     xlcell = 'A1';
-end;
+end
 
 
 % Put figure in clipboard
+if ~verLessThan('matlab','9.8')
+    copygraphics(hFig)
+else
+    % For older releases, use hgexport. Set renderer to painters to make
+    % sure it looks right.
+    r = get(hFig,'Renderer');
+    set(hFig,'Renderer','Painters')
+    drawnow
+    hgexport(hFig,'-clipboard')
+    set(hFig,'Renderer',r)
+end
 
-% New graphics system in R2014b changed the default renderer from painters
-% to opengl, which impacts figure export. Manually setting to Painters
-% seems to work pretty well.
-r = get(hFig,'Renderer');
-set(hFig,'Renderer','Painters')
-drawnow
-hgexport(hFig,'-clipboard')
-set(hFig,'Renderer',r)
 
 % Open Excel, add workbook, change active worksheet,
 % get/put array, save.
