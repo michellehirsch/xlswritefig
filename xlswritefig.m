@@ -62,7 +62,9 @@ end
 
 % Put figure in clipboard
 if ~verLessThan('matlab','9.8')
+    warning off MATLAB:print:ExportExcludesUI
     copygraphics(hFig)
+    warning on MATLAB:print:ExportExcludesUI
 else
     % For older releases, use hgexport. Set renderer to painters to make
     % sure it looks right.
