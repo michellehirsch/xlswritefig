@@ -69,7 +69,7 @@ else
     r = get(hFig,'Renderer');
     set(hFig,'Renderer','Painters')
     drawnow
-    hgexport(hFig,'-clipboard')
+    hgexport(hFig,'-clipboard') %#ok<HGEXPORT>
     set(hFig,'Renderer',r)
 end
 
@@ -106,7 +106,7 @@ catch %#ok<CTCH>   Suppress so that this function works in releases without MExc
     target_sheet = Excel.ActiveWorkBook.Worksheets.Add();
     target_sheet.Name = sheetname;
 
-end;
+end
 
 invoke(target_sheet, 'Activate');
 Activesheet = Excel.Activesheet;
