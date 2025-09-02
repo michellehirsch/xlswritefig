@@ -63,7 +63,11 @@ end
 % Put figure in clipboard
 if ~verLessThan('matlab','9.8')
     warning off MATLAB:print:ExportExcludesUI
-    copygraphics(hFig)
+    if isgraphics(hFig, 'figure')
+        copygraphics(hFig)
+    else
+        error('Figure handle is invalid or the figure has been deleted.');
+    end
     warning on MATLAB:print:ExportExcludesUI
 else
     % For older releases, use hgexport. Set renderer to painters to make
