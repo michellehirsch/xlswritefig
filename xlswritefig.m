@@ -53,7 +53,7 @@ end
 
 if nargin < 3 || isempty(sheetname)
     sheetname = 'Sheet1';
-end;
+end
 
 if nargin<4
     xlcell = 'A1';
@@ -112,8 +112,41 @@ invoke(target_sheet, 'Activate');
 Activesheet = Excel.Activesheet;
 
 
-% Paste to specified cell
-Paste(Activesheet,get(Activesheet,'Range',xlcell,xlcell))
+% --------------------
+% Try clipboard paste first; on failure, insert from a file (robust)
+% --------------------
+try
+    % Paste to specified cell
+    Paste(Activesheet,get(Activesheet,'Range',xlcell,xlcell));
+catch %#ok<CTCH>
+    % Fallback: export to file and insert without clipboard
+    
+    % USe EMF vector on Windows for crisp lines/text
+    % Use .png if images - I haven't added an input option, so you are on your own
+    tmpfile = [tempname '.emf'];
+    if ~verLessThan('matlab','9.8')
+        warning("off", 'MATLAB:print:ContentTypelmageSuggested')
+        exportgraphics(hFig,tmpfile,'ContentType','vector');
+        warning("on", 'MATLAB:print:ContentTypelmageSuggested')
+    else
+        print(hFig,tmpfile,'-dmeta'); % EMF via print
+    end
+
+    % Insert and position at the anchor cell
+    anchor = get(Activesheet,'Range',xlcell,xlcell);
+    left = anchor.Left;  top = anchor.Top;
+    Shapes = Activesheet.Shapes;
+    % LinkToFile=0 (msoFalse), SaveWithDocument=1 (msoTrue), Width/Height=-1 keep native size
+    pic = invoke(Shapes,'AddPicture', tmpfile, 0, 1, left, top, -1, -1);
+    try %#ok<TRYNC>
+        % Lock aspect ratio when available
+        pic.LockAspectRatio = true;
+    end
+
+    if ~isempty(tmpfile) && exist(tmpfile,'file'), delete(tmpfile); end
+end
+
+
 
 % Save and clean up
 if new && ~dontsave
