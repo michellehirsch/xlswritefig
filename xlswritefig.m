@@ -8,7 +8,7 @@ function xlswritefig(hFig,filename,sheetname,xlcell)
 %    hFig:      Handle to MATLAB figure.  If empty, current figure is
 %                   exported
 %    filename   (string) Name of Excel file, including extension.  If not specified, contents will
-%                  be opened in a new Excel spreadsheet. 
+%                  be opened in a new Excel spreadsheet.
 %    sheetname:  Name of sheet to write data to. The default is 'Sheet1'
 %                       If specified, a sheet with the specified name must
 %                       exist
@@ -24,11 +24,11 @@ function xlswritefig(hFig,filename,sheetname,xlcell)
 %         drawnow    % Maybe overkill, but ensures plot is drawn first
 %         xlswritefig
 %
-% Specify all options.  
-%         hFig = figure;      
+% Specify all options.
+%         hFig = figure;
 %         surf(peaks)
 %         xlswritefig(hFig,'MyNewFile.xlsx','Sheet2','D4')
-%         winopen('MyNewFile.xlsx')   
+%         winopen('MyNewFile.xlsx')
 
 % Michelle Hirsch
 % The MathWorks
@@ -36,48 +36,25 @@ function xlswritefig(hFig,filename,sheetname,xlcell)
 %
 % Is this function useful?  Drop me a line to let me know!
 
-
-if nargin==0 || isempty(hFig)
-    hFig = gcf;
+arguments
+    hFig {mustBeFigure} = gcf
+    filename (1,1) string = ""  % Not mustBeFile since we allow this to be empty
+    sheetname (1,1) string = "Sheet1"
+    xlcell (1,1) string = "A1"
 end
 
-if nargin<2 || isempty(filename)
-    filename ='';
+% Set the dontsave flag based on filename input. Also, convert filename to
+% full name with path.
+if filename == ""
     dontsave = true;
 else
     dontsave = false;
-    
     % Create full file name with path
     filename = fullfilename(filename);
 end
 
-if nargin < 3 || isempty(sheetname)
-    sheetname = 'Sheet1';
-end
-
-if nargin<4
-    xlcell = 'A1';
-end
 
 
-% Put figure in clipboard
-if ~verLessThan('matlab','9.8')
-    warning off MATLAB:print:ExportExcludesUI
-    if isgraphics(hFig, 'figure')
-        copygraphics(hFig)
-    else
-        error('Figure handle is invalid or the figure has been deleted.');
-    end
-    warning on MATLAB:print:ExportExcludesUI
-else
-    % For older releases, use hgexport. Set renderer to painters to make
-    % sure it looks right.
-    r = get(hFig,'Renderer');
-    set(hFig,'Renderer','Painters')
-    drawnow
-    hgexport(hFig,'-clipboard') %#ok<HGEXPORT>
-    set(hFig,'Renderer',r)
-end
 
 
 % Open Excel, add workbook, change active worksheet,
@@ -122,11 +99,15 @@ Activesheet = Excel.Activesheet;
 % Try clipboard paste first; on failure, insert from a file (robust)
 % --------------------
 try
+    % Put figure in clipboard
+    warning off MATLAB:print:ExportExcludesUI
+    copygraphics(hFig)
+    warning on MATLAB:print:ExportExcludesUI
     % Paste to specified cell
     Paste(Activesheet,get(Activesheet,'Range',xlcell,xlcell));
 catch %#ok<CTCH>
     % Fallback: export to file and insert without clipboard
-    
+
     % USe EMF vector on Windows for crisp lines/text
     % Use .png if images - I haven't added an input option, so you are on your own
     tmpfile = [tempname '.emf'];
@@ -170,11 +151,23 @@ end
 
 function filename = fullfilename(filename)
 [filepath, filename, fileext] = fileparts(filename);
-if isempty(filepath)
+if filepath == ""
     filepath = pwd;
 end
 if isempty(fileext)
     fileext = '.xlsx';
 end
-filename = fullfile(filepath, [filename fileext]);
+filename = fullfile(filepath, filename+fileext);
+end
+
+
+%------------------------------
+% Validation function: must be a figure handle or empty
+%------------------------------
+function mustBeFigure(h)
+if ~(isempty(h) || isgraphics(h,'figure'))
+    eidType = 'xlswritefig:mustBeFigure';
+    msg = 'hFig must be a valid figure handle or empty [].';
+    throwAsCaller(MException(eidType, msg));
+end
 end
